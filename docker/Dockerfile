@@ -1,14 +1,28 @@
-FROM centos:7.2.1511
-		
-ARG branch_of_interest		
-ENV VARSIM_VERSION $branch_of_interest
+FROM rockylinux:8
 
-RUN yum update -y
-RUN yum install -y centos-release-scl; yum clean all
-RUN yum install -y gcc gcc-c++ make; yum clean all
-RUN yum install -y zlib-devel curl less vim bzip2; yum clean all
-RUN yum install -y git wget unzip; yum clean all
+ARG branch_of_interest=master
+ENV VARSIM_VERSION=$branch_of_interest
 
-RUN cd /opt && git clone https://github.com/bioinform/varsim.git
-RUN cd /opt/varsim && git checkout ${VARSIM_VERSION} && ./build.sh
-ENV PATH=/opt/varsim/:${PATH}
+# Install system dependencies
+RUN yum update -y && \
+    yum install -y \
+        gcc gcc-c++ make \
+        zlib-devel curl less vim bzip2 \
+        git wget unzip \
+        java-1.8.0-openjdk-devel \
+        maven ant \
+        python3 python3-pip \
+        centos-release-scl && \
+    yum clean all
+
+# Clone your fixed fork of VarSim
+RUN cd /opt && \
+    git clone https://github.com/Alx-Kouris/varsim.git
+
+# Use your updated build script
+RUN cd /opt/varsim && \
+    git checkout ${VARSIM_VERSION} && \
+    ./build.sh
+
+# Add VarSim to PATH
+ENV PATH="/opt/varsim:$PATH"
