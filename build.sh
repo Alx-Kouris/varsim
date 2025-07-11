@@ -8,15 +8,6 @@ OPT_DIR=${DIR}/opt
 mkdir -p ${OPT_DIR}
 pushd ${OPT_DIR}
 
-
-JDK8_DIR="${OPT_DIR}/jdk1.8.0_131"
-if [ ! -d ${JDK8_DIR} ];then
-wget -O- --no-check-certificate --no-cookies --header "Cookie: oraclelicense=accept-securebackup-cookie" \
-    http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz | tar -zxvf -
-fi
-
-export PATH=${JDK8_DIR}/bin:${PATH}
-
 PYTHON_DIR=${OPT_DIR}/miniconda2
 CONDA=Miniconda2-4.6.14-Linux-x86_64.sh
 samtools_version="1.9"
@@ -48,15 +39,6 @@ wget --no-check-certificate -q https://repo.continuum.io/miniconda/${CONDA}\
     fi
 fi
 
-MAVEN_DIR=${OPT_DIR}/apache-maven-3.5.4
-if [[ ! -d ${MAVEN_DIR} ]]; then
-wget --no-check-certificate -O- http://mirrors.sonic.net/apache/maven/maven-3/3.5.4/binaries/apache-maven-3.5.4-bin.tar.gz | tar zxvf -
-fi
-ANT_DIR=${OPT_DIR}/apache-ant-1.9.13
-if [[ ! -d ${ANT_DIR} ]]; then
-wget --no-check-certificate -O- https://archive.apache.org/dist/ant/binaries/apache-ant-1.9.13-bin.tar.gz | tar zxvf -
-fi
-
 BZIP_DIR=${OPT_DIR}/bzip2-1.0.6
 if [[ ! -d ${BZIP_DIR} ]]; then
     wget --no-check-certificate -O- https://www.sourceware.org/pub/bzip2/bzip2-1.0.6.tar.gz --no-check-certificate | tar zxvf -
@@ -76,16 +58,16 @@ if [[ ! -d ${ART_DIR} ]]; then
 fi
 
 popd
-export JAVA_HOME=${OPT_DIR}/jdk1.8.0_131
+
 version=$(git describe | sed 's/^v//')
-${MAVEN_DIR}/bin/mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$version
-${MAVEN_DIR}/bin/mvn package
+mvn versions:set -DgenerateBackupPoms=false -DnewVersion=$version
+mvn package
 
 git submodule init
 git submodule update
 pushd rtg-tools
 rm -rf rtg-tools-*
-${ANT_DIR}/bin/ant zip-nojre
+ant zip-nojre
 unzip dist/rtg-tools*.zip
 cp rtg-tools*/RTG.jar $DIR
 popd
