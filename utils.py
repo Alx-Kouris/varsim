@@ -52,7 +52,7 @@ def count_variants(vcf):
 def check_java(java="java"):
     logger = logging.getLogger(check_java.__name__)
     try:
-        output = subprocess.check_output(f"{java} -Xmx100m -version", stderr=subprocess.STDOUT, shell=True).decode("utf-8")
+        output = subprocess.check_output("{} -Xmx100m -version".format(java), stderr=subprocess.STDOUT, shell=True).decode("utf-8")
         logger.debug("Java version output:\n%s", output)
 
         # Parse version string from any line containing 'version'
