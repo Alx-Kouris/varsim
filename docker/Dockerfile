@@ -11,8 +11,7 @@ RUN yum update -y && \
         git wget unzip \
         java-1.8.0-openjdk-devel \
         maven ant \
-        python3 python3-pip \
-        centos-release-scl && \
+        python3 python3-pip && \
     yum clean all
 
 # Clone your fixed fork of VarSim
