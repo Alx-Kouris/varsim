@@ -52,15 +52,22 @@ def count_variants(vcf):
 def check_java(java="java"):
     logger = logging.getLogger(check_java.__name__)
     try:
-        jv = subprocess.check_output("{} -Xmx100m -version".format(java), stderr=subprocess.STDOUT, shell=True)
-        #if "openjdk" in jv or "OpenJDK" in jv:
-        #   raise EnvironmentError("Please replace OpenJDK with Oracle JDK")
-        jv = filter(lambda x: x.startswith("java version"), jv.split("\n"))[0].split()[2].replace("\"", "")
+        output = subprocess.check_output(f"{java} -Xmx100m -version", stderr=subprocess.STDOUT, shell=True).decode("utf-8")
+        logger.debug("Java version output:\n%s", output)
+
+        # Parse version string from any line containing 'version'
+        version_line = next((line for line in output.strip().split("\n") if "version" in line),None)
+        if not version_line:
+            raise EnvironmentError("Could not detect Java version from output:\n" + output)
+
+        jv = version_line.split()[2].strip('"')
+
         if LooseVersion(jv) < LooseVersion("1.8"):
-            logger.error("VarSim requires Java 1.8 to be on the path.")
-            raise EnvironmentError("VarSim requires Java 1.8 to be on the path")
+            logger.error("VarSim requires Java 1.8 or higher.")
+            raise EnvironmentError("VarSim requires Java 1.8 or higher")
     except subprocess.CalledProcessError:
-        raise EnvironmentError("No java (>=1.8) found")
+        raise EnvironmentError("Java not found or not working properly")
+
 
 def get_version(java="java"):
     java = get_java(java)
